@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Token Baru Launching (Solana Meme)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      padding: 20px;
+    }
+    .token {
+      background: white;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Token Baru Launching (Solana MEME)</h1>
+  <div id="list-token">Loading...</div>
+
+  <script>
+    async function fetchTokens() {
+      try {
+        const res = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana');
+        const data = await res.json();
+        const tokenList = document.getElementById('list-token');
+        tokenList.innerHTML = '';
+
+        // Sort berdasarkan waktu listing terbaru
+        const sortedPairs = data.pairs.sort((a, b) => b.pairCreatedAt - a.pairCreatedAt);
+
+        // Tampilkan 10 token terbaru
+        sortedPairs.slice(0, 10).forEach(pair => {
+          const tokenName = pair.baseToken.name || 'Unknown';
+          const tokenSymbol = pair.baseToken.symbol || 'N/A';
+          const priceUsd = pair.priceUsd ? `$${parseFloat(pair.priceUsd).toFixed(6)}` : 'N/A';
+          const volume24h = pair.volume?.h24 ? pair.volume.h24.toLocaleString() : 'N/A';
+          const dexName = pair.dexId || 'Unknown DEX';
+          const createdAt = pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toLocaleString() : 'N/A';
+
+          const item = document.createElement('div');
+          item.className = 'token';
+          item.innerHTML = `
+            <strong>${tokenName} (${tokenSymbol})</strong><br>
+            Harga: ${priceUsd}<br>
+            Volume 24h: ${volume24h}<br>
+            DEX: ${dexName}<br>
+            Launching: ${createdAt}<br>
+          `;
+
+          tokenList.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Gagal fetch data:', err);
+      }
+    }
+
+    // Pertama kali load
+    fetchTokens();
+    // Auto refresh setiap 15 detik
+    setInterval(fetchTokens, 15000);
+  </script>
+</body>
+</html>
